@@ -14,7 +14,7 @@ Created on Tue Mar 19 12:22:59 2019
 #Xc  = 1184.310
 #Yc  = 18004.140
 #Xd  = 1151.140
-#Yd  = 17957.410
+Yd  = 17957.410
 #Xp  = 1168.210
 #Yp  = 17981.459
 
@@ -43,6 +43,18 @@ Yd=wczytaj(' Yd: ')
 #%%
 
 def pktprze(Xa,Ya,Xb,Yb,Xc,Yc,Xd,Yd):
+    import matplotlib.pyplot as plt
+    Xab=[]
+    Yab=[]
+    Xcd=[]
+    Ycd=[]
+    
+    Xap=[]
+    Yap=[]
+    Xcp=[]
+    Ycp=[]
+    
+    
     
     if ((Xb-Xa)*(Yd-Yc)-(Yb-Ya)*(Xd-Xc)) != 0:
         t1=((Xc-Xa)*(Yd-Yc)-(Yc-Ya)*(Xd-Xc))/((Xb-Xa)*(Yd-Yc)-(Yb-Ya)*(Xd-Xc))
@@ -54,24 +66,55 @@ def pktprze(Xa,Ya,Xb,Yb,Xc,Yc,Xd,Yd):
         Xp=round(Xp1,3)
         Yp=round(Yp1,3)
         
-        if t1>0 and t1<1 and t2>0 and t2<1:
-            odp='punkt leży na przecięciu odcinków'
-        elif t1>0 and t1<1 and t2<0 or t2>1:
-            odp='punkt leży na odcinku AB'
-        elif t1<0 or t1>1 and t2>0 and t2<1:
-            odp='punkt leży na odcinku CD'
+        Xap.append(Xa)
+        Xap.append(Xp)
+        Yap.append(Ya)
+        Yap.append(Yp)
+        Xcp.append(Xc)
+        Xcp.append(Xp)
+        Ycp.append(Yc)
+        Ycp.append(Yp)
+        
+        if t1>=0 and t1<=1 and t2>=0 and t2<=1:
+            odp='punkt lezy na przecieciu odcinkow'
+        elif t1>=0 and t1<=1 and t2<=0 or t2>=1:
+            odp='punkt lezy na odcinku AB'
+            plt.plot(Ycp,Xcp,':')
+        elif t1<=0 or t1>=1 and t2>=0 and t2<=1:
+            odp='punkt lezy na odcinku CD'
+            plt.plot(Yap,Xap,':')
         else:
-            odp='punkt leży na przedłużeniu obu prostych'
-    
+            odp='punkt lezy na przedłuezniu obu prostych'
+        with open('wspP.txt', 'w') as plik:
+            plik.write('{:^20s}|{:^20s}|{:s}\n'.format('Xp','Yp','polozenie punktu'))
+            plik.write('{:^20.3f}|{:^20.3f}|{:s}'.format(Xp,Yp,odp))
+        
+        Xab.append(Xa)
+        Xab.append(Xb)
+        Yab.append(Ya)
+        Yab.append(Yb)
+        
+        Xcd.append(Xc)
+        Xcd.append(Xd)
+        Ycd.append(Yc)
+        Ycd.append(Yd)
+        
+        plt.plot(Yab,Xab, label= 'Odc AB')
+        plt.plot(Ycd,Xcd, label= 'Odc CD')
+        plt.scatter(Yp,Xp, label= 'pkt P')
+        plt.scatter(Ya,Xa, label= 'pkt A')
+        plt.scatter(Yb,Xb, label= 'pkt B')
+        plt.scatter(Yc,Xc, label= 'pkt C')
+        plt.scatter(Yd,Xd, label= 'pkt D')
+        plt.legend()
+        
     else:
-        odp='punkt przecięcia nie istnieje bo proste są równoległe'
+        odp='punkt przecięcia nie istnieje bo proste są rownolegle'
         Xp='brak'
         Yp='brak'
-        
     
     
     return(Xp, Yp, odp)
 
-Xp, Yp, odp= pktprze(Xa,Ya,Xb,Yb,Xc,Yc,Xd,Yd)
-
+Xp, Yp, odp = pktprze(Xa,Ya,Xb,Yb,Xc,Yc,Xd,Yd)
 print(Xp, Yp, odp)
