@@ -1,2 +1,2 @@
          Xp         |         Yp         |polozenie punktu
-      1168.210      |     17981.459      |punkt lezy na przecieciu odcinkow
+       2.273        |       6.818        |punkt lezy na odcinku CD
