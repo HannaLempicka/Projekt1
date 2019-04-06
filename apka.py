@@ -7,6 +7,7 @@ Created on Tue Mar 26 12:34:41 2019
 import sys
 
 from PunktPrzeciecia import pktprze
+from azymut import az
 
 from PyQt5.QtWidgets import QLineEdit, QPushButton, QLabel, QWidget, QApplication, QGridLayout, QColorDialog
 
@@ -29,7 +30,8 @@ class AppWindow(QWidget):
     def initWidget(self):
         btn= QPushButton('Rysuj + wsp P', self)
         btnCol= QPushButton('Kolor', self)
-        xaLabel = QLabel('Xa', self)
+        btnCzysc= QPushButton('Czysc', self)
+        xaLabel = QLabel('{:^}'.format('Xa'), self)
         yaLabel = QLabel('Ya', self)
         xbLabel = QLabel('Xb', self)
         ybLabel = QLabel('Yb', self)
@@ -39,6 +41,11 @@ class AppWindow(QWidget):
         ydLabel = QLabel('Yd', self)
         xpLabel = QLabel('Xp', self)
         ypLabel = QLabel('Yp', self)
+        odpLabel = QLabel('{:>50s}'.format('odpowiedź'), self)
+        azABLabel = QLabel('{:>50s}'.format('azymut AB'), self)
+        azCDLabel = QLabel('{:>50s}'.format('azymut CD'), self)
+        azABopLabel = QLabel('{:<50s}'.format('(stopnie, minuty, sekundy)'), self)
+        azCDopLabel = QLabel('{:<50s}'.format('(stopnie, minuty, sekundy)'), self)
         self.xaEdit = QLineEdit()
         self.yaEdit = QLineEdit()
         self.xbEdit = QLineEdit()
@@ -49,6 +56,9 @@ class AppWindow(QWidget):
         self.ydEdit = QLineEdit()
         self.xpEdit = QLineEdit()
         self.ypEdit = QLineEdit()
+        self.odpEdit = QLineEdit()
+        self.azABEdit = QLineEdit()
+        self.azCDEdit = QLineEdit()
         
         self.figure = plt.figure()
         self.canvas = FigureCanvas(self.figure)
@@ -79,9 +89,10 @@ class AppWindow(QWidget):
         grid.addWidget(ydLabel, 1, 6)
         grid.addWidget(self.ydEdit, 1, 7)
         
-        
         grid.addWidget(btn, 3, 2, 1, 2)
         grid.addWidget(btnCol, 3, 5, 1, 2)
+        grid.addWidget(btnCzysc, 5, 6, 1, 2)
+        
         
         grid.addWidget(ypLabel, 4, 2)
         grid.addWidget(self.ypEdit, 4, 3)
@@ -89,17 +100,46 @@ class AppWindow(QWidget):
         grid.addWidget(xpLabel, 4, 4)
         grid.addWidget(self.xpEdit, 4, 5)
         
-        grid.addWidget(self.canvas, 5, 1, 10, -1)
+        grid.addWidget(odpLabel, 5, 1, 1, 2)
+        grid.addWidget(self.odpEdit, 5, 3, 1, 3)
+        
+        grid.addWidget(azABLabel, 6, 1, 1, 2)
+        grid.addWidget(self.azABEdit, 6, 3, 1, 2)
+        
+        grid.addWidget(azCDLabel, 7, 1, 1, 2)
+        grid.addWidget(self.azCDEdit, 7, 3, 1, 2)
+        
+        grid.addWidget(azABopLabel, 6, 5)
+        grid.addWidget(azCDopLabel, 7, 5)
+        
+        grid.addWidget(self.canvas, 8, 1, 10, -1)
               
         self.setLayout(grid)
         
         btn.clicked.connect(self.oblicz)
         btnCol.clicked.connect(self.zmienKolor)
+        btnCzysc.clicked.connect(self.czysc)
+    
+    def czysc(self):
+        self.xaEdit.clear()
+        self.yaEdit.clear()
+        self.xbEdit.clear()
+        self.ybEdit.clear()
+        self.xcEdit.clear()
+        self.ycEdit.clear()
+        self.xdEdit.clear()
+        self.ydEdit.clear()
+        self.xpEdit.clear()
+        self.ypEdit.clear()
+        self.odpEdit.clear()
+        self.azABEdit.clear()
+        self.azCDEdit.clear()
+        
     
     def zmienKolor(self):
         kolor = QColorDialog.getColor()
         if kolor.isValid():
-            print(kolor.name())
+#            print(kolor.name())
             self.rysuj(kol=kolor.name())
      
     def SprawdzLiczbe(self, element):
@@ -122,10 +162,10 @@ class AppWindow(QWidget):
         yc = self.SprawdzLiczbe(self.ycEdit)
         xd = self.SprawdzLiczbe(self.xdEdit)
         yd = self.SprawdzLiczbe(self.ydEdit)
-        print(xa,ya)
-        print(xb,yb)
-        print(xc,yc)
-        print(xd,yd)
+#        print(xa,ya)
+#        print(xb,yb)
+#        print(xc,yc)
+#        print(xd,yd)
         
         if None not in [xa,ya,xb,yb,xc,yc,xd,yd]:
             xa = float(self.xaEdit.text())
@@ -137,24 +177,35 @@ class AppWindow(QWidget):
             xd = float(self.xdEdit.text())
             yd = float(self.ydEdit.text())
             
-            t1, t2, xp, yp=pktprze(xa,ya,xb,yb,xc,yc,xd,yd)
+            t1, t2, xp, yp, odp=pktprze(xa,ya,xb,yb,xc,yc,xd,yd)
+            azAB=az(xa, ya, xb, yb)
+            azCD=az(xc, yc, xd, yd)
             
             self.xpEdit.setText(str(xp))
             self.ypEdit.setText(str(yp))
+            self.odpEdit.setText(odp)
+            self.azABEdit.setText(str(azAB))
+            self.azCDEdit.setText(str(azCD))
 
-            self.figure.clear()
-            ax = self.figure.add_subplot(111)
-            if t1>=0 and t1<=1 and t2<0 or t2>1:
-                ax.plot([yc,yp],[xc,xp],':')
-            elif t2>=0 and t2<=1 and t1<0 or t1>1:
-                ax.plot([ya,yp],[xa,xp],':')
-            else:
-                ax.plot([yc,yp],[xc,xp],':')
-                ax.plot([ya,yp],[xa,xp],':')
-            ax.plot([ya, yb], [xa, xb], color=kol)
-            ax.plot([yc, yd], [xc, xd], color=kol)
-            ax.scatter(yp, xp)
-            self.canvas.draw()
+            if None not in [t1, t2]:
+                self.figure.clear()
+                ax = self.figure.add_subplot(111)
+                if t1>=0 and t1<=1 and t2<0 or t2>1:
+                    ax.plot([yc,yp],[xc,xp],':')
+                elif t2>=0 and t2<=1 and t1<0 or t1>1:
+                    ax.plot([ya,yp],[xa,xp],':')
+                else:
+                    ax.plot([yc,yp],[xc,xp],':')
+                    ax.plot([ya,yp],[xa,xp],':')
+                ax.plot([ya, yb], [xa, xb], color=kol, label= 'Odc AB')
+                ax.plot([yc, yd], [xc, xd], color=kol, label= 'Odc CD')
+                ax.scatter(yp, xp, label= 'pkt P')
+                ax.scatter(ya,xa, label= 'pkt A')
+                ax.scatter(yb,xb, label= 'pkt B')
+                ax.scatter(yc,xc, label= 'pkt C')
+                ax.scatter(yd,xd, label= 'pkt D')
+                ax.legend()
+                self.canvas.draw()
     
     def wpisz(self):
         self.xEdit.setText('1')

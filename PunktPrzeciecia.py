@@ -42,9 +42,16 @@ def wczytaj(wsp):
 
 #%%
 def pktprze(Xa,Ya,Xb,Yb,Xc,Yc,Xd,Yd):
-    import matplotlib.pyplot as plt    
+    import matplotlib.pyplot as plt  
     
-    if ((Xb-Xa)*(Yd-Yc)-(Yb-Ya)*(Xd-Xc)) != 0:
+    if ((Xb-Xa)*(Yd-Yc)-(Yb-Ya)*(Xd-Xc)) == 0:
+        odp='punkt przecięcia nie istnieje bo proste są rownolegle'
+        Xp='brak'
+        Yp='brak'
+        t1=None
+        t2=None
+    
+    elif ((Xb-Xa)*(Yd-Yc)-(Yb-Ya)*(Xd-Xc)) != 0:
         t1=((Xc-Xa)*(Yd-Yc)-(Yc-Ya)*(Xd-Xc))/((Xb-Xa)*(Yd-Yc)-(Yb-Ya)*(Xd-Xc))
         t2=((Xc-Xa)*(Yb-Ya)-(Yc-Ya)*(Xb-Xa))/((Xb-Xa)*(Yd-Yc)-(Yb-Ya)*(Xd-Xc))
         
@@ -79,13 +86,7 @@ def pktprze(Xa,Ya,Xb,Yb,Xc,Yc,Xd,Yd):
         plt.scatter(Yd,Xd, label= 'pkt D')
         plt.legend()
         
-    else:
-        odp='punkt przecięcia nie istnieje bo proste są rownolegle'
-        Xp='brak'
-        Yp='brak'
-    
-    
-    return(t1, t2, Xp, Yp)
+    return(t1, t2, Xp, Yp, odp)
 
 #t1, t2, Xp, Yp, odp = pktprze(Xa,Ya,Xb,Yb,Xc,Yc,Xd,Yd)
 #print('Współrzędna Xp= ', Xp,'m')

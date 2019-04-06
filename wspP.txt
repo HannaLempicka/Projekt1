@@ -1,2 +1,2 @@
          Xp         |         Yp         |polozenie punktu
-       2.273        |       6.818        |punkt lezy na odcinku CD
+       5.000        |       5.000        |punkt lezy na odcinku AB
