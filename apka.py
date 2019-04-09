@@ -7,7 +7,8 @@ Created on Tue Mar 26 12:34:41 2019
 import sys
 
 from PunktPrzeciecia import pktprze
-from azymut import az
+from azymut import az, dms
+from math import pi, degrees
 
 from PyQt5.QtWidgets import QLineEdit, QPushButton, QLabel, QWidget, QApplication, QGridLayout, QColorDialog
 
@@ -44,8 +45,12 @@ class AppWindow(QWidget):
         odpLabel = QLabel('{:>50s}'.format('odpowiedź'), self)
         azABLabel = QLabel('{:>50s}'.format('azymut AB'), self)
         azCDLabel = QLabel('{:>50s}'.format('azymut CD'), self)
+        azBALabel = QLabel('{:>50s}'.format('azymut BA'), self)
+        azDCLabel = QLabel('{:>50s}'.format('azymut DC'), self)
         azABopLabel = QLabel('{:<50s}'.format('(stopnie, minuty, sekundy)'), self)
         azCDopLabel = QLabel('{:<50s}'.format('(stopnie, minuty, sekundy)'), self)
+        azBAopLabel = QLabel('{:<50s}'.format('(stopnie, minuty, sekundy)'), self)
+        azDCopLabel = QLabel('{:<50s}'.format('(stopnie, minuty, sekundy)'), self)
         self.xaEdit = QLineEdit()
         self.yaEdit = QLineEdit()
         self.xbEdit = QLineEdit()
@@ -59,6 +64,9 @@ class AppWindow(QWidget):
         self.odpEdit = QLineEdit()
         self.azABEdit = QLineEdit()
         self.azCDEdit = QLineEdit()
+        self.azBAEdit = QLineEdit()
+        self.azDCEdit = QLineEdit()
+        
         
         self.figure = plt.figure()
         self.canvas = FigureCanvas(self.figure)
@@ -109,10 +117,19 @@ class AppWindow(QWidget):
         grid.addWidget(azCDLabel, 7, 1, 1, 2)
         grid.addWidget(self.azCDEdit, 7, 3, 1, 2)
         
+        grid.addWidget(azBALabel, 8, 1, 1, 2)
+        grid.addWidget(self.azBAEdit, 8, 3, 1, 2)
+        
+        grid.addWidget(azDCLabel, 9, 1, 1, 2)
+        grid.addWidget(self.azDCEdit, 9, 3, 1, 2)
+        
         grid.addWidget(azABopLabel, 6, 5)
         grid.addWidget(azCDopLabel, 7, 5)
         
-        grid.addWidget(self.canvas, 8, 1, 10, -1)
+        grid.addWidget(azBAopLabel, 8, 5)
+        grid.addWidget(azDCopLabel, 9, 5)
+        
+        grid.addWidget(self.canvas, 10, 1, 10, -1)
               
         self.setLayout(grid)
         
@@ -184,8 +201,7 @@ class AppWindow(QWidget):
             self.xpEdit.setText(str(xp))
             self.ypEdit.setText(str(yp))
             self.odpEdit.setText(odp)
-            self.azABEdit.setText(str(azAB))
-            self.azCDEdit.setText(str(azCD))
+            
 
             if None not in [t1, t2]:
                 self.figure.clear()
@@ -199,16 +215,128 @@ class AppWindow(QWidget):
                     ax.plot([ya,yp],[xa,xp],':')
                 ax.plot([ya, yb], [xa, xb], color=kol, label= 'Odc AB')
                 ax.plot([yc, yd], [xc, xd], color=kol, label= 'Odc CD')
-                ax.scatter(yp, xp, label= 'pkt P')
+                ax.scatter(yp,xp, label= 'pkt P')
                 ax.scatter(ya,xa, label= 'pkt A')
                 ax.scatter(yb,xb, label= 'pkt B')
                 ax.scatter(yc,xc, label= 'pkt C')
                 ax.scatter(yd,xd, label= 'pkt D')
+                
+                if azAB <= 180:
+                    self.azABEdit.setText(str(dms(azAB)))
+                    if xb-xa == 0 and yb-ya > 0:
+                        print(1)
+                        ax.plot([ya, ya], [xa, xa+abs(ya-yb)/2], ':', label= 'N')    
+                        ax.annotate('',
+                                xy=(ya, xa+abs(ya-yb)/6), xycoords='data',
+                                xytext=(ya+abs(ya-yb)/6, xa), textcoords='data',
+                                arrowprops=dict(arrowstyle="<-",
+                                                connectionstyle="arc3,rad=.4"))
+                    elif yb==ya:
+                        print(2)
+                        ax.plot([yb, yb], [xa, xa+abs(xa-xb)/2], ':', 'N')
+                        ax.annotate('',
+                                    xy=(ya, xa+abs(xa-xb)/4), xycoords='data',
+                                    xytext=(ya, xa-abs(xb-xa)/4), textcoords='data',
+                                    arrowprops=dict(arrowstyle="<-",
+                                                    connectionstyle="arc3,rad=0.4"))
+                    else:
+                        print(3)
+                        ax.plot([ya, ya], [xa, xa+abs(xa-xb)/2], ':', 'N')
+                        a=(xb-xa)/(yb-ya)
+                        b=xa-a*ya
+                        ax.annotate('',
+                                    xy=(ya, xa+abs(xa-xb)/4), xycoords='data',
+                                    xytext=(ya+abs(ya-yb)/6, a*(ya+abs(ya-yb)/6)+b), textcoords='data',
+                                    arrowprops=dict(arrowstyle="<-",
+                                                    connectionstyle="arc3,rad=0.4"))
+                
+                elif azAB > 180:
+                    self.azBAEdit.setText(str(dms(azAB)))
+                    if xa-xb == 0 and ya-yb > 0:
+                        print(4)
+                        ax.plot([yb, yb], [xb, xb+abs(yb-ya)/2], ':', label='N')    
+                        ax.annotate('',
+                                xy=(yb, xb+abs(yb-ya)/6), xycoords='data',
+                                xytext=(yb+abs(yb-ya)/6, xb), textcoords='data',
+                                arrowprops=dict(arrowstyle="<-",
+                                                connectionstyle="arc3,rad=.4"))
+                    elif ya==yb:
+                        print(5)
+                        ax.plot([ya, ya], [xb, xb+abs(xb-xa)/2], ':', label='N')
+                        ax.annotate('',
+                                    xy=(yb, xb+abs(xb-xa)/4), xycoords='data',
+                                    xytext=(yb, xa-abs(xa-xb)/4), textcoords='data',
+                                    arrowprops=dict(arrowstyle="<-",
+                                                    connectionstyle="arc3,rad=0.4"))
+                    else:
+                        print(6)
+                        ax.plot([yb, yb], [xb, xb+abs(xb-xa)/2], ':', label='N')
+                        a=(xa-xb)/(ya-yb)
+                        b=xb-a*yb
+                        ax.annotate('',
+                                    xy=(yb, xb+abs(xb-xa)/4), xycoords='data',
+                                    xytext=(yb+abs(yb-ya)/6, a*(yb+abs(yb-ya)/6)+b), textcoords='data',
+                                    arrowprops=dict(arrowstyle="<-",
+                                                    connectionstyle="arc3,rad=0.4"))
+                if azCD <= 180:
+                    self.azCDEdit.setText(str(dms(azCD)))
+                    if xd-xc == 0 and yd-yc > 0:
+                        print(7)
+                        ax.plot([yc, yc], [xc, xc+abs(yc-yd)/2], ':', label='N')    
+                        ax.annotate('',
+                                xy=(yc, xc+abs(yc-yd)/6), xycoords='data',
+                                xytext=(yc+abs(yc-yd)/6, xc), textcoords='data',
+                                arrowprops=dict(arrowstyle="<-",
+                                                connectionstyle="arc3,rad=.4"))
+                    elif yd==yc:
+                        print(8)
+                        ax.plot([yd, yd], [xc, xc+abs(xc-xd)/2], ':', label='N')
+                        ax.annotate('',
+                                    xy=(yc, xc+abs(xc-xd)/4), xycoords='data',
+                                    xytext=(yd, xc-abs(xd-xc)/4), textcoords='data',
+                                    arrowprops=dict(arrowstyle="<-",
+                                                    connectionstyle="arc3,rad=0.4"))
+                    else:
+                        print(9)
+                        ax.plot([yc, yc], [xc, xc+abs(xc-xd)/2], ':', label='N')
+                        a=(xd-xc)/(yd-yc)
+                        b=xc-a*yc
+                        ax.annotate('',
+                                    xy=(yc, xc+abs(xc-xd)/4), xycoords='data',
+                                    xytext=(yc+abs(yc-yd)/6, a*(yc+abs(yc-yd)/6)+b), textcoords='data',
+                                    arrowprops=dict(arrowstyle="<-",
+                                                    connectionstyle="arc3,rad=0.4"))
+                
+                elif azCD > 180:
+                    self.azDCEdit.setText(str(dms(azCD)))
+                    if xc-xd == 0 and yc-yd > 0:
+                        print(10)
+                        ax.plot([yd, yd], [xd, xd+abs(yd-yc)/2], ':', label='N')    
+                        ax.annotate('',
+                                xy=(yd, xd+abs(yd-yc)/6), xycoords='data',
+                                xytext=(yd+abs(yd-yc)/6, xd), textcoords='data',
+                                arrowprops=dict(arrowstyle="<-",
+                                                connectionstyle="arc3,rad=.4"))
+                    elif yc==yd:
+                        print(11)
+                        ax.plot([yc, yc], [xd, xd+abs(xd-xc)/2], ':', label='N')
+                        ax.annotate('',
+                                    xy=(yd, xd+abs(xd-xc)/4), xycoords='data',
+                                    xytext=(yd, xc-abs(xc-xd)/4), textcoords='data',
+                                    arrowprops=dict(arrowstyle="<-",
+                                                    connectionstyle="arc3,rad=0.4"))
+                    else:
+                        print(12)
+                        ax.plot([yd, yd], [xd, xd+abs(xd-xc)/2], ':', label='N')
+                        a=(xc-xd)/(yc-yd)
+                        b=xd-a*yd
+                        ax.annotate('',
+                                    xy=(yd, xd+abs(xd-xc)/4), xycoords='data',
+                                    xytext=(yd+abs(yd-yc)/6, a*(yd+abs(yc-yd)/6)+b), textcoords='data',
+                                    arrowprops=dict(arrowstyle="<-",
+                                                    connectionstyle="arc3,rad=0.4"))          
                 ax.legend()
                 self.canvas.draw()
-    
-    def wpisz(self):
-        self.xEdit.setText('1')
 
 def main():
     app = QApplication(sys.argv)

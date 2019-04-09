@@ -1,2 +1,2 @@
          Xp         |         Yp         |polozenie punktu
-       5.000        |       5.000        |punkt lezy na odcinku AB
+       92.844       |      166.285       |punkt lezy na odcinku AB

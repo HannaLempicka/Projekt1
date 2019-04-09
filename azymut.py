@@ -30,14 +30,14 @@ def az(Xa, Ya, Xb, Yb):
         az=270
     elif Xb-Xa != 0:
         az=degrees(atan((Yb-Ya)/(Xb-Xa)))
-        if Xb-Xa>0 and Yb-Ya>0:
+        
+        if Xb-Xa>0 and Yb-Ya>=0:
             az=az
-        elif Xb-Xa>0 and Yb-Ya<0:
+        elif Xb-Xa<0 and Yb-Ya>=0:
             az=az+180
-        elif Xb-Xa<0 and Yb-Ya<0:
+        elif Xb-Xa<0 and Yb-Ya<=0:
             az=az+180
-        elif Xb-Xa<0 and Yb-Ya>0:
+        elif Xb-Xa>0 and Yb-Ya<=0:
             az=az+360
     
-    azdms =dms(az)
-    return azdms
+    return az
