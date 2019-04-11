@@ -60,19 +60,22 @@ def pktprze(Xa,Ya,Xb,Yb,Xc,Yc,Xd,Yd):
         
         Xp=round(Xp1,3)
         Yp=round(Yp1,3)
-        
-        if t1>=0 and t1<=1 and t2>=0 and t2<=1:
-            odp='punkt lezy na przecieciu odcinkow'
-        elif t1>=0 and t1<=1 and t2<0 or t2>1:
-            odp='punkt lezy na odcinku AB'
-            plt.plot([Yc,Yp],[Xc,Xp],':')
-        elif t2>=0 and t2<=1 and t1<0 or t1>1:
-            odp='punkt lezy na odcinku CD'
-            plt.plot([Ya,Yp],[Xa,Xp],':')
+            
+        if t1>=0 and t1<=1:
+            if t2>=0 and t2<=1:
+                odp='punkt lezy na przecieciu odcinkow'
+            else:
+                odp='punkt lezy na odcinku AB'
+                plt.plot([Yc,Yp],[Xc,Xp],':')
         else:
-            odp='punkt lezy na przedluzeniu obu prostych'
-            plt.plot([Ya,Yp],[Xa,Xp],':')
-            plt.plot([Yc,Yp],[Xc,Xp],':')
+            if t2>=0 and t2<=1:
+                odp='punkt lezy na odcinku CD'
+                plt.plot([Ya,Yp],[Xa,Xp],':')
+            else:
+                odp='punkt lezy na przedluzeniu obu prostych'
+                plt.plot([Ya,Yp],[Xa,Xp],':')
+                plt.plot([Yc,Yp],[Xc,Xp],':')
+                        
         with open('wspP.txt', 'w') as plik:
             plik.write('{:^20s}|{:^20s}|{:s}\n'.format('Xp','Yp','polozenie punktu'))
             plik.write('{:^20.3f}|{:^20.3f}|{:s}'.format(Xp,Yp,odp))

@@ -1,2 +1,2 @@
          Xp         |         Yp         |polozenie punktu
-       92.844       |      166.285       |punkt lezy na odcinku AB
+       1.000        |       4.000        |punkt lezy na przecieciu odcinkow

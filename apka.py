@@ -8,7 +8,6 @@ import sys
 
 from PunktPrzeciecia import pktprze
 from azymut import az, dms
-from math import pi, degrees
 
 from PyQt5.QtWidgets import QLineEdit, QPushButton, QLabel, QWidget, QApplication, QGridLayout, QColorDialog
 
@@ -30,7 +29,8 @@ class AppWindow(QWidget):
     
     def initWidget(self):
         btn= QPushButton('Rysuj + wsp P', self)
-        btnCol= QPushButton('Kolor', self)
+        btnColAB= QPushButton('Kolor AB', self)
+        btnColCD= QPushButton('Kolor CD', self)
         btnCzysc= QPushButton('Czysc', self)
         xaLabel = QLabel('{:^}'.format('Xa'), self)
         yaLabel = QLabel('Ya', self)
@@ -47,10 +47,10 @@ class AppWindow(QWidget):
         azCDLabel = QLabel('{:>50s}'.format('azymut CD'), self)
         azBALabel = QLabel('{:>50s}'.format('azymut BA'), self)
         azDCLabel = QLabel('{:>50s}'.format('azymut DC'), self)
-        azABopLabel = QLabel('{:<50s}'.format('(stopnie, minuty, sekundy)'), self)
-        azCDopLabel = QLabel('{:<50s}'.format('(stopnie, minuty, sekundy)'), self)
-        azBAopLabel = QLabel('{:<50s}'.format('(stopnie, minuty, sekundy)'), self)
-        azDCopLabel = QLabel('{:<50s}'.format('(stopnie, minuty, sekundy)'), self)
+        azABopLabel = QLabel('{:<30s}'.format('(stopnie, minuty, sekundy)'), self)
+        azCDopLabel = QLabel('{:<30s}'.format('(stopnie, minuty, sekundy)'), self)
+        azBAopLabel = QLabel('{:<30s}'.format('(stopnie, minuty, sekundy)'), self)
+        azDCopLabel = QLabel('{:<30s}'.format('(stopnie, minuty, sekundy)'), self)
         self.xaEdit = QLineEdit()
         self.yaEdit = QLineEdit()
         self.xbEdit = QLineEdit()
@@ -98,7 +98,9 @@ class AppWindow(QWidget):
         grid.addWidget(self.ydEdit, 1, 7)
         
         grid.addWidget(btn, 3, 2, 1, 2)
-        grid.addWidget(btnCol, 3, 5, 1, 2)
+        grid.addWidget(btnColAB, 3, 4, 1, 2)
+        grid.addWidget(btnColCD, 3, 6, 1, 2)
+        
         grid.addWidget(btnCzysc, 5, 6, 1, 2)
         
         
@@ -134,7 +136,8 @@ class AppWindow(QWidget):
         self.setLayout(grid)
         
         btn.clicked.connect(self.oblicz)
-        btnCol.clicked.connect(self.zmienKolor)
+        btnColAB.clicked.connect(self.zmienKolor)
+        btnColCD.clicked.connect(self.zmienKolor2)
         btnCzysc.clicked.connect(self.czysc)
     
     def czysc(self):
@@ -158,6 +161,13 @@ class AppWindow(QWidget):
         if kolor.isValid():
 #            print(kolor.name())
             self.rysuj(kol=kolor.name())
+    
+    def zmienKolor2(self):
+        kolor = QColorDialog.getColor()
+        if kolor.isValid():
+#            print(kolor.name())
+            self.rysuj(kol2=kolor.name())
+        
      
     def SprawdzLiczbe(self, element):
         if element.text().lstrip('-').replace('.','',1).isdigit():
@@ -170,7 +180,7 @@ class AppWindow(QWidget):
         self.rysuj()
         
         
-    def rysuj(self, kol='red'):
+    def rysuj(self, kol='red', kol2='blue'):
         xa = self.SprawdzLiczbe(self.xaEdit)
         ya = self.SprawdzLiczbe(self.yaEdit)
         xb = self.SprawdzLiczbe(self.xbEdit)
@@ -206,15 +216,20 @@ class AppWindow(QWidget):
             if None not in [t1, t2]:
                 self.figure.clear()
                 ax = self.figure.add_subplot(111)
-                if t1>=0 and t1<=1 and t2<0 or t2>1:
-                    ax.plot([yc,yp],[xc,xp],':')
-                elif t2>=0 and t2<=1 and t1<0 or t1>1:
-                    ax.plot([ya,yp],[xa,xp],':')
+                if t1>=0 and t1<=1:
+                    if t2>=0 and t2<=1:
+                        pass
+                    else:
+                        ax.plot([yc,yp],[xc,xp],':')
                 else:
-                    ax.plot([yc,yp],[xc,xp],':')
-                    ax.plot([ya,yp],[xa,xp],':')
+                    if t2>=0 and t2<=1:
+                        ax.plot([ya,yp],[xa,xp],':')
+                    else:
+                        ax.plot([yc,yp],[xc,xp],':')
+                        ax.plot([ya,yp],[xa,xp],':')
+                        
                 ax.plot([ya, yb], [xa, xb], color=kol, label= 'Odc AB')
-                ax.plot([yc, yd], [xc, xd], color=kol, label= 'Odc CD')
+                ax.plot([yc, yd], [xc, xd], color=kol2, label= 'Odc CD')
                 ax.scatter(yp,xp, label= 'pkt P')
                 ax.scatter(ya,xa, label= 'pkt A')
                 ax.scatter(yb,xb, label= 'pkt B')
@@ -224,24 +239,27 @@ class AppWindow(QWidget):
                 if azAB <= 180:
                     self.azABEdit.setText(str(dms(azAB)))
                     if xb-xa == 0 and yb-ya > 0:
-                        print(1)
+#                        print(1)
                         ax.plot([ya, ya], [xa, xa+abs(ya-yb)/2], ':', label= 'N')    
                         ax.annotate('',
                                 xy=(ya, xa+abs(ya-yb)/6), xycoords='data',
                                 xytext=(ya+abs(ya-yb)/6, xa), textcoords='data',
                                 arrowprops=dict(arrowstyle="<-",
                                                 connectionstyle="arc3,rad=.4"))
+                    elif yb==ya and xb>xa:
+                        pass
+                    
                     elif yb==ya:
-                        print(2)
-                        ax.plot([yb, yb], [xa, xa+abs(xa-xb)/2], ':', 'N')
+#                        print(2)
+                        ax.plot([yb, yb], [xa, xa+abs(xa-xb)/2], ':', label= 'N')
                         ax.annotate('',
                                     xy=(ya, xa+abs(xa-xb)/4), xycoords='data',
                                     xytext=(ya, xa-abs(xb-xa)/4), textcoords='data',
                                     arrowprops=dict(arrowstyle="<-",
                                                     connectionstyle="arc3,rad=0.4"))
                     else:
-                        print(3)
-                        ax.plot([ya, ya], [xa, xa+abs(xa-xb)/2], ':', 'N')
+#                        print(3)
+                        ax.plot([ya, ya], [xa, xa+abs(xa-xb)/2], ':', label= 'N')
                         a=(xb-xa)/(yb-ya)
                         b=xa-a*ya
                         ax.annotate('',
@@ -253,15 +271,16 @@ class AppWindow(QWidget):
                 elif azAB > 180:
                     self.azBAEdit.setText(str(dms(azAB)))
                     if xa-xb == 0 and ya-yb > 0:
-                        print(4)
+#                        print(4)
                         ax.plot([yb, yb], [xb, xb+abs(yb-ya)/2], ':', label='N')    
                         ax.annotate('',
                                 xy=(yb, xb+abs(yb-ya)/6), xycoords='data',
                                 xytext=(yb+abs(yb-ya)/6, xb), textcoords='data',
                                 arrowprops=dict(arrowstyle="<-",
                                                 connectionstyle="arc3,rad=.4"))
+                    
                     elif ya==yb:
-                        print(5)
+#                        print(5)
                         ax.plot([ya, ya], [xb, xb+abs(xb-xa)/2], ':', label='N')
                         ax.annotate('',
                                     xy=(yb, xb+abs(xb-xa)/4), xycoords='data',
@@ -269,7 +288,7 @@ class AppWindow(QWidget):
                                     arrowprops=dict(arrowstyle="<-",
                                                     connectionstyle="arc3,rad=0.4"))
                     else:
-                        print(6)
+#                        print(6)
                         ax.plot([yb, yb], [xb, xb+abs(xb-xa)/2], ':', label='N')
                         a=(xa-xb)/(ya-yb)
                         b=xb-a*yb
@@ -281,15 +300,18 @@ class AppWindow(QWidget):
                 if azCD <= 180:
                     self.azCDEdit.setText(str(dms(azCD)))
                     if xd-xc == 0 and yd-yc > 0:
-                        print(7)
+#                        print(7)
                         ax.plot([yc, yc], [xc, xc+abs(yc-yd)/2], ':', label='N')    
                         ax.annotate('',
                                 xy=(yc, xc+abs(yc-yd)/6), xycoords='data',
                                 xytext=(yc+abs(yc-yd)/6, xc), textcoords='data',
                                 arrowprops=dict(arrowstyle="<-",
                                                 connectionstyle="arc3,rad=.4"))
+                    elif yd==yc and xd>xc:
+                        pass
+                    
                     elif yd==yc:
-                        print(8)
+#                        print(8)
                         ax.plot([yd, yd], [xc, xc+abs(xc-xd)/2], ':', label='N')
                         ax.annotate('',
                                     xy=(yc, xc+abs(xc-xd)/4), xycoords='data',
@@ -297,7 +319,7 @@ class AppWindow(QWidget):
                                     arrowprops=dict(arrowstyle="<-",
                                                     connectionstyle="arc3,rad=0.4"))
                     else:
-                        print(9)
+#                        print(9)
                         ax.plot([yc, yc], [xc, xc+abs(xc-xd)/2], ':', label='N')
                         a=(xd-xc)/(yd-yc)
                         b=xc-a*yc
@@ -310,7 +332,7 @@ class AppWindow(QWidget):
                 elif azCD > 180:
                     self.azDCEdit.setText(str(dms(azCD)))
                     if xc-xd == 0 and yc-yd > 0:
-                        print(10)
+#                        print(10)
                         ax.plot([yd, yd], [xd, xd+abs(yd-yc)/2], ':', label='N')    
                         ax.annotate('',
                                 xy=(yd, xd+abs(yd-yc)/6), xycoords='data',
@@ -318,7 +340,7 @@ class AppWindow(QWidget):
                                 arrowprops=dict(arrowstyle="<-",
                                                 connectionstyle="arc3,rad=.4"))
                     elif yc==yd:
-                        print(11)
+#                        print(11)
                         ax.plot([yc, yc], [xd, xd+abs(xd-xc)/2], ':', label='N')
                         ax.annotate('',
                                     xy=(yd, xd+abs(xd-xc)/4), xycoords='data',
@@ -326,7 +348,7 @@ class AppWindow(QWidget):
                                     arrowprops=dict(arrowstyle="<-",
                                                     connectionstyle="arc3,rad=0.4"))
                     else:
-                        print(12)
+#                        print(12)
                         ax.plot([yd, yd], [xd, xd+abs(xd-xc)/2], ':', label='N')
                         a=(xc-xd)/(yc-yd)
                         b=xd-a*yd
