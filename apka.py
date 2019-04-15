@@ -32,7 +32,7 @@ class AppWindow(QWidget):
         btnColAB= QPushButton('Kolor AB', self)
         btnColCD= QPushButton('Kolor CD', self)
         btnCzysc= QPushButton('Czysc', self)
-        xaLabel = QLabel('{:^}'.format('Xa'), self)
+        xaLabel = QLabel('Xa', self)
         yaLabel = QLabel('Ya', self)
         xbLabel = QLabel('Xb', self)
         ybLabel = QLabel('Yb', self)
